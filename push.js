@@ -1,8 +1,14 @@
-var argv = require('optimist').argv;
-var request = require('request');
+// load configurations
+var configLoader = require('./lib/configLoader.js');
+var config = configLoader.loadYaml('config');
 
+// logger
+var logger = require('./lib/logger.js')(config.stdLogLevel);
+logger.expose(GLOBAL);
+
+// read schedule time from commandline
+var argv = require('optimist').argv;
 var hour = null, minute = null;
-var token = 'ceeded729d8c61a44331ed8c7402e354';
 
 if (argv['_'].length > 0) {
   var p = argv['_'];
@@ -12,18 +18,18 @@ if (argv['_'].length > 0) {
 }
 
 if (hour == null || minute == null) {
-  hour = 17;
-  minute = 0;
+  hour = config.defaultCron.hour;
+  minute = config.defaultCron.minute;
 }
 
-var CronJob = require('cron').CronJob;
-new CronJob('0 ' + minute + ' ' + hour + ' * * *', function() {
-  console.log('Schedule...');
+// prepare other stuff
+var queue = require('./lib/queue.js');
+var cron = require('./lib/cron.js');
+var req = require('./lib/req.js');
 
-  request.get({
-    url: 'http://sse.tongji.edu.cn/sse_subscription/api/get_article/' + token + '/0',
-  }, function (err, res, body) {
-    console.log(body);
+queue.prepare(config.mq, function () {
+  cron.cron(hour, minute, function () {
+    info('Scheduled');
+    req.sendTo(config.apiToken, queue);
   });
-
-}, null, true, 'Asia/Shanghai');
+});
