@@ -17,11 +17,11 @@ if (hour == null || minute == null) {
 }
 
 var CronJob = require('cron').CronJob;
-new CronJob('* ' + minute + ' ' + hour + ' * * *', function() {
+new CronJob('0 ' + minute + ' ' + hour + ' * * *', function() {
   console.log('Schedule...');
 
   request.get({
-    url: 'http://sse.tongji.edu.cn/sse_subscription/api/get_article/0',
+    url: 'http://sse.tongji.edu.cn/sse_subscription/api/get_article/' + token + '/0',
   }, function (err, res, body) {
     console.log(body);
   });
