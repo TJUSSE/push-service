@@ -1,0 +1,20 @@
+stdLogLevel: debug
+
+defaultCron:
+  hour: 18
+  minute: 0
+
+api:
+  url: "http://sse.tongji.edu.cn/subscribe/api/get_article/{token}/{time}"
+  token: YOUR_API_TOKEN_HERE
+
+mq:
+  connection: amqp://USERNAME:PASSWORD@localhost:5672
+  exchange:
+    name: sse
+    type: direct
+    options:
+      durable: true
+      autoDelete: false
+  binding:
+    name: mail
